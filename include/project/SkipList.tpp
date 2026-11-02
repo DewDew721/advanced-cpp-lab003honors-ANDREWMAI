@@ -16,7 +16,7 @@ SkipList<Key, Value>::SkipList(std::size_t maxLevel, double probability, unsigne
     if (probability_ <= 0 || probability_ >= 1) {
         throw std::invalid_argument("probability must be in the range (0, 1)");
     }
-    head_ = new Node(maxLevel_, Key());
+    head_ = new Node(Key{}, Value{}, maxLevel_); // Sentinel node with default key and value
 }
 
 template <typename Key, typename Value>
