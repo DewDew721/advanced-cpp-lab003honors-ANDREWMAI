@@ -5,7 +5,7 @@ namespace project {
 template <typename Key, typename Value, typename Compare>
 int AVLTree<Key, Value, Compare>::nodeHeight(const Node* n) {
     // TODO: return the height of n, treating a null child consistently.
-    return n ? n->height : -1;
+    return n ? n->height : 0;
 }
 
 template <typename Key, typename Value, typename Compare>
@@ -89,8 +89,8 @@ AVLTree<Key, Value, Compare>::rotateRight(Node* y) {
     y->left = x->right;
     x->right = y;
 
-    x->height = std::max(nodeHeight(x->left), nodeHeight(x->right)) + 1;
     y->height = std::max(nodeHeight(y->left), nodeHeight(y->right)) + 1;
+    x->height = std::max(nodeHeight(x->left), nodeHeight(x->right)) + 1;
 
     return x;
 }
@@ -128,6 +128,8 @@ AVLTree<Key, Value, Compare>::insert(Node* n, const Key& key,
         n->left = insert(n->left, key, value, inserted);
     } else if (Compare()(n->key, key)) {
         n->right = insert(n->right, key, value, inserted);
+    } else {
+        n->value = value;
     }
     n = rebalance(n);
     return n;
@@ -178,7 +180,7 @@ AVLTree<Key, Value, Compare>::erase(Node* n, const Key& key, bool& removed) {
         }
     }
 
-    return n;
+    return rebalance(n);
 }
 
 template <typename Key, typename Value, typename Compare>
@@ -241,15 +243,24 @@ bool AVLTree<Key, Value, Compare>::validate(const Node* n, const Key* lo,
                                             const Key* hi, int& computedHeight) {
     // TODO: verify BST ordering, stored heights, and AVL balance.
     if (!n) {
-        computedHeight = -1;
+        computedHeight = 0;
         return true;
     }
 
-    else if ((lo && Compare()(n->key, *lo)) || (hi && Compare()(*hi, n->key))) {
+    if ((lo && Compare()(n->key, *lo)) || (hi && Compare()(*hi, n->key))) {
         return false; // BST property violated
     }
 
-    return true;
+    int leftHeight = 0;
+    int rightHeight = 0;
+    if (!validate(n->left, lo, &n->key, leftHeight) ||
+        !validate(n->right, &n->key, hi, rightHeight)) {
+        return false;
+    }
+
+    computedHeight = std::max(leftHeight, rightHeight) + 1;
+    return n->height == computedHeight &&
+           leftHeight - rightHeight >= -1 && leftHeight - rightHeight <= 1;
 }
 
 template <typename Key, typename Value, typename Compare>
@@ -442,6 +453,7 @@ void SplayTree<Key, Value, Compare>::insert(const Key& key,
     }
     // Key does not exist, insert it
     Node* newNode = new Node(key, value);
+    newNode->parent = parent;
     if (parent) {
         if (Compare()(key, parent->key)) {
             parent->left = newNode;
