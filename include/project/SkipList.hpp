@@ -19,6 +19,7 @@ private:
     Node* head_;
     std::size_t size_;
     std::size_t maxLevel_;
+    std::size_t currentLevel_;
     double probability_;
     std::mt19937 generator_;
     std::uniform_real_distribution<double> distribution_;

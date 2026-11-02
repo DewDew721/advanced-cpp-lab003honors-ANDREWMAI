@@ -7,7 +7,7 @@
 
 template <typename Key, typename Value>
 SkipList<Key, Value>::SkipList(std::size_t maxLevel, double probability, unsigned int seed)
-    : head_(nullptr), size_(0), maxLevel_(maxLevel), probability_(probability),
+    : head_(nullptr), size_(0), maxLevel_(maxLevel), currentLevel_(0), probability_(probability),
       generator_(seed), distribution_(0.0, 1.0) {
     // TODO: Validate arguments and create the sentinel head node.
     if (maxLevel_ == 0) {
@@ -24,7 +24,7 @@ SkipList<Key, Value>::~SkipList() { clear(); }
 
 template <typename Key, typename Value>
 SkipList<Key, Value>::SkipList(SkipList&& other) noexcept
-    : head_(other.head_), size_(other.size_), maxLevel_(other.maxLevel_),
+    : head_(other.head_), size_(other.size_), maxLevel_(other.maxLevel_), currentLevel_(other.currentLevel_),
       probability_(other.probability_), generator_(std::move(other.generator_)),
       distribution_(other.distribution_) {
     other.head_ = nullptr;
@@ -38,6 +38,7 @@ SkipList<Key, Value>& SkipList<Key, Value>::operator=(SkipList&& other) noexcept
         head_ = other.head_;
         size_ = other.size_;
         maxLevel_ = other.maxLevel_;
+        currentLevel_ = other.currentLevel_;
         probability_ = other.probability_;
         generator_ = std::move(other.generator_);
         distribution_ = other.distribution_;
